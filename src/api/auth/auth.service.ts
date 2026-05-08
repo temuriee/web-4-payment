@@ -4,17 +4,16 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-// import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
-// import { hash, verify } from 'argon2';
-import { Request, Response } from 'express';
-// import { isDev, ms, StringValue } from 'src/common/utils';
 import { PrismaService } from 'src/infra/infra/prisma/prisma.service';
-
-import { LoginRequest, RegisterRequest } from './dto';
-// import { JwtPayload } from './interfaces';
-
+import { RegisterRequest } from '../dto/register.dto';
+import { hash, verify } from 'argon2';
+import { isDev, ms, StringValue } from 'src/common/utils';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { User } from '@prisma/client';
+import { JwtPayload } from './interfaces';
+import type { Response, Request } from 'express';
+import { LoginRequest } from '../dto';
 @Injectable()
 export class AuthService {
   private readonly JWT_ACCESS_TOKEN_TTL: StringValue;
@@ -24,8 +23,8 @@ export class AuthService {
 
   public constructor(
     private readonly prismaService: PrismaService,
+    private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    // private readonly jwtService: JwtService,
   ) {
     this.JWT_ACCESS_TOKEN_TTL = configService.getOrThrow<StringValue>(
       'JWT_ACCESS_TOKEN_TTL',
@@ -34,8 +33,7 @@ export class AuthService {
       'JWT_REFRESH_TOKEN_TTL',
     );
 
-    this.COOKIES_DOMAIN =
-      configService.getOrThrow<StringValue>('COOKIES_DOMAIN');
+    this.COOKIES_DOMAIN = configService.getOrThrow<string>('COOKIES_DOMAIN');
   }
 
   public async register(res: Response, dto: RegisterRequest) {
@@ -50,17 +48,17 @@ export class AuthService {
     if (exists)
       throw new ConflictException('User with this email already exists');
 
-    const hashedPassword = await hash(password);
+    const hasshedPassword = await hash(password);
 
     const user = await this.prismaService.user.create({
       data: {
         name,
         email,
-        password: hashedPassword,
+        password: hasshedPassword,
       },
     });
 
-    return this.auth(res, user);
+    return this.generateTokens(user);
   }
 
   public async login(res: Response, dto: LoginRequest) {
@@ -74,12 +72,20 @@ export class AuthService {
 
     if (!user) throw new NotFoundException('Invalid email or password');
 
+    // Prevent argon2 verify from throwing when a malformed/non-hash value exists in DB.
+    if (!user.password.startsWith('$'))
+      throw new NotFoundException('Invalid email or password');
+
     const isValidPasword = await verify(user.password, password);
 
     if (!isValidPasword)
       throw new NotFoundException('Invalid email or password');
 
     return this.auth(res, user);
+  }
+
+  public async logout(res: Response) {
+    return this.setCookie(res, '', new Date(0));
   }
 
   public async refresh(req: Request, res: Response) {
@@ -108,17 +114,23 @@ export class AuthService {
     }
   }
 
-  public async logout(res: Response) {
-    return this.setCookie(res, '', new Date(0));
-  }
-
   private async auth(res: Response, user: User) {
     const { accessToken, refreshToken, refreshTokenExpires } =
       await this.generateTokens(user);
 
     this.setCookie(res, refreshToken, refreshTokenExpires);
 
-    return { accessToken };
+    return { accessToken, refreshToken };
+  }
+
+  private setCookie(res: Response, value: string, expires: Date) {
+    res.cookie('refreshToken', value, {
+      httpOnly: true,
+      domain: this.COOKIES_DOMAIN,
+      expires,
+      secure: !isDev(this.configService),
+      sameSite: 'lax',
+    });
   }
 
   private async generateTokens(user: User) {
@@ -143,15 +155,5 @@ export class AuthService {
       refreshToken,
       refreshTokenExpires,
     };
-  }
-
-  private setCookie(res: Response, value: string, expires: Date) {
-    res.cookie('refreshToken', value, {
-      httpOnly: true,
-      domain: this.COOKIES_DOMAIN,
-      expires,
-      secure: !isDev(this.configService),
-      sameSite: 'lax',
-    });
   }
 }

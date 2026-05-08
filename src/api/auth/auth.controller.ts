@@ -1,20 +1,20 @@
 import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+
+import type { Request, Response } from 'express';
+
 import {
   ApiConflictResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags,
 } from '@nestjs/swagger';
-import type { Request, Response } from 'express';
-
+import { AuthResponse, LoginRequest, RegisterRequest } from '../dto';
 import { AuthService } from './auth.service';
-import { AuthResponse, LoginRequest, RegisterRequest } from './dto';
 
-@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  public constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
+  // Register endpoint
   @ApiOperation({
     summary: 'Register a new user',
     description:
@@ -34,6 +34,7 @@ export class AuthController {
     return await this.authService.register(res, dto);
   }
 
+  // Login endpoint
   @ApiOperation({
     summary: 'Login an existing user',
     description:
@@ -50,6 +51,7 @@ export class AuthController {
     return await this.authService.login(res, dto);
   }
 
+  // Refresh token endpoint
   @ApiOperation({
     summary: 'Refresh access token',
     description:
@@ -65,6 +67,8 @@ export class AuthController {
   ) {
     return await this.authService.refresh(req, res);
   }
+
+  // Logout endpoint
 
   @ApiOperation({
     summary: 'Logout user',
