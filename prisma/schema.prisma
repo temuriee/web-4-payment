@@ -14,6 +14,11 @@ model User {
   email    String @unique
   password String
 
+  // One-to-one relationship with UserSubscription - one user can have only one subscription
+  subscription UserSubscription?
+  // Transactions array - one user can have multiple transactions // its mean relation ship: one-to-many with Transaction model, its mean that one user can have multiple transactions, but each transaction belongs to only one user
+  transactions Transaction[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -33,8 +38,98 @@ model Plan {
 
   isFeatured Boolean @default(false) @map("is_featured")
 
+  // One-to-many relationship with UserSubscription - one plan can have multiple subscriptions, but each subscription belongs to only one plan
+  subscription UserSubscription[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("plans")
+}
+
+model UserSubscription {
+  id String @id @default(nanoid())
+
+  status SubscriptionStatus @default(PENDING_PAYMENT)
+
+  startDate DateTime? @map("start_date")
+  endDate   DateTime? @map("end_date")
+
+  transactions Transaction[]
+
+  // One-to-one relationship with User - one user can have only one subscription // its mean relation ship: one-to-one with User model, its mean that one user can have only one subscription, and each subscription belongs to only one user
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique @map("user_id")
+
+  // Many-to-one relationship with Plan - one plan can have multiple subscriptions
+  // its mean relation ship: many-to-one with Plan model, its mean that many subscriptions can belong to one plan, but each subscription belongs to only one plan
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId String @map("plan_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("user_subscriptions")
+}
+
+model Transaction {
+  id String @id @default(nanoid())
+
+  amount Int
+
+  provider PaymentProvider
+  status   TransactionStatus @default(PENDING)
+
+  externalId   String? @map("external_id")
+  providerMeta Json?   @map("provider_meta")
+
+  // Billing period for the transaction, e.g., monthly or yearly
+  billingPeriod BillingPeriod @map("billing_period")
+
+  // Many-to-one relationship with User - one user can have multiple transactions
+  // its mean relation ship: many-to-one with User model, its mean that many transactions can belong to one user, but each transaction belongs to only one user
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  // Many-to-one relationship with UserSubscription - one subscription can have multiple transactions
+  // its mean relation ship: many-to-one with UserSubscription model, its mean that many transactions can belong to one subscription, but each transaction belongs to only one subscription
+  subscription   UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  subscriptionId String           @map("subscription_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("transactions")
+}
+
+enum SubscriptionStatus {
+  PENDING_PAYMENT
+  ACTIVE
+  EXPIRED
+
+  @@map("subscription_statuses")
+}
+
+enum PaymentProvider {
+  YOOKASSA
+  STRIPE
+  CRYPTOPAY
+  STARS
+
+  @@map("payment_providers")
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+
+  @@map("transaction_statuses")
+}
+
+enum BillingPeriod {
+  MONTHLY
+  YEARLY
+
+  @@map("billing_periods")
 }
