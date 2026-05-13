@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PlanService } from './plan.service';
 import { PlanController } from './plan.controller';
-import { PrismaModule } from 'src/infra/infra/prisma/prisma.module';
+import { PrismaModule } from 'src/infra/prisma/prisma.module';
 
 @Module({
   controllers: [PlanController],

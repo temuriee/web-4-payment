@@ -4,7 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/infra/infra/prisma/prisma.service';
+import { PrismaService } from 'src/infra/prisma/prisma.service';
 import { RegisterRequest } from '../dto/register.dto';
 import { hash, verify } from 'argon2';
 import { isDev, ms, StringValue } from 'src/common/utils';
