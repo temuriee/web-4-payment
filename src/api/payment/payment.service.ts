@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { BillingPeriod, PaymentProvider, type User } from '@prisma/client';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
+import { InitPaymentRequest } from './dto';
 
 @Injectable()
 export class PaymentService {
@@ -33,5 +34,71 @@ export class PaymentService {
     }));
 
     return formatted;
+  }
+  public async init(dto: InitPaymentRequest, user: User) {
+    const { planId, billingPeriod, provider } = dto;
+
+    const plan = await this.prismaService.plan.findUnique({
+      where: {
+        id: planId,
+      },
+    });
+
+    if (!plan) throw new NotFoundException('Selected plan not found');
+
+    const amount =
+      billingPeriod === BillingPeriod.MONTHLY
+        ? plan.monthlyPrice
+        : plan.yearlyPrice;
+
+    const transaction = await this.prismaService.transaction.create({
+      data: {
+        amount,
+        provider,
+        billingPeriod,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+        subscription: {
+          connectOrCreate: {
+            where: {
+              userId: user.id,
+            },
+            create: {
+              user: {
+                connect: {
+                  id: user.id,
+                },
+              },
+              plan: {
+                connect: {
+                  id: plan.id,
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    let payment;
+
+    switch (provider) {
+      case PaymentProvider.STRIPE:
+        break;
+    }
+
+    await this.prismaService.transaction.update({
+      where: {
+        id: transaction.id,
+      },
+      data: {
+        providerMeta: payment,
+      },
+    });
+
+    return payment;
   }
 }

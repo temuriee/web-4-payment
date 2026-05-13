@@ -7857,6 +7857,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"stripe@npm:^22.1.1":
+  version: 22.1.1
+  resolution: "stripe@npm:22.1.1"
+  peerDependencies:
+    "@types/node": ">=18"
+  peerDependenciesMeta:
+    "@types/node":
+      optional: true
+  checksum: 10c0/4c3c313ed87d2fc36d758d8b5f4966ab8182aee30ce60eb2114a21a10c622dbaad3aeb74d0f0a97131a04b07f9d4a37b8d85369e7623d35fe5298e3bcbd8bdab
+  languageName: node
+  linkType: hard
+
 "strtok3@npm:^10.3.4":
   version: 10.3.4
   resolution: "strtok3@npm:10.3.4"
@@ -8628,6 +8640,7 @@ __metadata:
     reflect-metadata: "npm:^0.2.2"
     rxjs: "npm:^7.8.1"
     source-map-support: "npm:^0.5.21"
+    stripe: "npm:^22.1.1"
     supertest: "npm:^7.0.0"
     ts-jest: "npm:^29.2.5"
     ts-loader: "npm:^9.5.2"
