@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BillingPeriod, PaymentProvider, type User } from '@prisma/client';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
 import { InitPaymentRequest } from './dto';
+import { StripeService } from './providers/stripe/stripe.service';
 
 @Injectable()
 export class PaymentService {
-  public constructor(private readonly prismaService: PrismaService) {}
+  public constructor(
+    private readonly stripeService: StripeService,
+    private readonly prismaService: PrismaService,
+  ) {}
 
   public async getHistory(user: User) {
     const payments = await this.prismaService.transaction.findMany({
@@ -83,10 +87,16 @@ export class PaymentService {
       },
     });
 
-    let payment;
+    let payment: string | { url: string };
 
     switch (provider) {
       case PaymentProvider.STRIPE:
+        payment = await this.stripeService.create(
+          plan,
+          transaction,
+          user,
+          billingPeriod,
+        );
         break;
     }
 

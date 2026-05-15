@@ -13,8 +13,8 @@ export const plans: Omit<Plan, 'id' | 'createdAt' | 'updatedAt'>[] = [
     isFeatured: false,
     monthlyPrice: 2,
     yearlyPrice: 20,
-    stripeMonthlyPriceId: 'price_1SglbmADTNBivpyEj1Grspgz',
-    stripeYearlyPriceId: 'price_1SglbmADTNBivpyEEUKBhKJD',
+    stripeMonthlyPriceId: 'price_1TWhQQ0yaKXaINGIWKOpenYy',
+    stripeYearlyPriceId: 'price_1TWhQQ0yaKXaINGI7aGs7qhU',
   },
   {
     title: 'Professional',
@@ -29,8 +29,8 @@ export const plans: Omit<Plan, 'id' | 'createdAt' | 'updatedAt'>[] = [
     isFeatured: true,
     monthlyPrice: 4,
     yearlyPrice: 40,
-    stripeMonthlyPriceId: 'price_1Sgld3ADTNBivpyEuV1uFJSx',
-    stripeYearlyPriceId: 'price_1Sgld3ADTNBivpyEarKPPhrk',
+    stripeMonthlyPriceId: 'price_1TWhRp0yaKXaINGIreb5UmnT',
+    stripeYearlyPriceId: 'price_1TWhSU0yaKXaINGITaiaKcUq',
   },
   {
     title: 'Business',
@@ -46,7 +46,7 @@ export const plans: Omit<Plan, 'id' | 'createdAt' | 'updatedAt'>[] = [
     isFeatured: false,
     monthlyPrice: 6,
     yearlyPrice: 60,
-    stripeMonthlyPriceId: 'price_1SgleJADTNBivpyEAWk7AE2Q',
-    stripeYearlyPriceId: 'price_1SgleJADTNBivpyEhRMlNN0C',
+    stripeMonthlyPriceId: 'price_1TWhX00yaKXaINGIuxhAm83c',
+    stripeYearlyPriceId: 'price_1TWhX00yaKXaINGIxuGPf6cT',
   },
 ];
