@@ -87,7 +87,7 @@ export class PaymentService {
       },
     });
 
-    let payment: string | { url: string };
+    let payment;
 
     switch (provider) {
       case PaymentProvider.STRIPE:
