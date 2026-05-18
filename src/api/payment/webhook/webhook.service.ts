@@ -10,9 +10,9 @@ export class WebhookService {
   ) {}
 
   public async handleStripe(rawbody: Buffer, sig: string) {
-    // const event = await this.stripeService.parseEvent(rawbody);
-    // const result = await this.stripeService.handleWebhook(event);
-    // if (!result) return { ok: true };
-    // return await this.paymentHandler.processResult(result);
+    const event = await this.stripeService.parseEvent(rawbody, sig);
+    const result = await this.stripeService.handleWebhook(event);
+    if (!result) return { ok: true };
+    return await this.paymentHandler.processResult(result);
   }
 }

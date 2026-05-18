@@ -1,6 +1,8 @@
+version: '3.9'
+
 services:
-  payment-postgres:
-    container_name: payment-postgres
+  postgres:
+    container_name: postgres
     image: postgres:latest
     restart: always
     env_file:
@@ -8,16 +10,28 @@ services:
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
     ports:
-      - '5433:5432'
+      - 5433:5432
     volumes:
       - postgres_data:/var/lib/postgresql
     networks:
       - payment-course
 
+  redis:
+    container_name: redis
+    image: redis:5.0
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    networks:
+      - payment-course
+
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   payment-course:

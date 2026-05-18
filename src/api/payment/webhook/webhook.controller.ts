@@ -20,10 +20,10 @@ export class WebhookController {
   @HttpCode(HttpStatus.OK)
   public async handleStripe(
     @Req() req: RawBodyRequest<Request>,
-    @Headers('stripe-signature') sig: String,
+    @Headers('stripe-signature') sig: string,
   ) {
     if (!sig) throw new UnauthorizedException('Missing Signature');
 
-    // return await this.webhookService.handleStripe(req.rawBody!, sig);
+    return await this.webhookService.handleStripe(req.rawBody!, sig);
   }
 }

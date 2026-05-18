@@ -6,6 +6,8 @@ import { AppGateway } from './app/app.gateway';
 import { InfraModule } from './infra/infra.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ApiModule } from './api/api.module';
+import { MailModule } from './libs/mail/mail.module';
+import { LibsModule } from './libs/libs.module';
 
 @Module({
   imports: [
@@ -15,6 +17,7 @@ import { ApiModule } from './api/api.module';
     InfraModule,
     ChatModule,
     ApiModule,
+    LibsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppGateway],
